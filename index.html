@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gouse | Cloud Development</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Visitor List</h1>
+    <ul id="visitor-list"></ul>
+
+    <a href="downloads/get-visitors.js" download>Download get-visitors.js</a>
+
+    <script>
+        fetch('/.netlify/functions/get-visitors')
+            .then(res => res.json())
+            .then(data => {
+                const list = document.getElementById('visitor-list');
+                data.forEach(v => {
+                    const li = document.createElement('li');
+                    li.textContent = v.name + " — " + v.visited_at;
+                    list.appendChild(li);
+                });
+            })
+            .catch(err => console.error(err));
+    </script>
+</body>
+</html>
