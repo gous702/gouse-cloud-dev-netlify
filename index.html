@@ -1,29 +1,213 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gouse | Cloud Development</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gouse | Cloud Development</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1e3c72, #2a5298, #6a11cb, #2575fc);
+      color: #ffffff;
+      padding: 30px 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 40px 20px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+      margin-bottom: 30px;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      margin-bottom: 12px;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      opacity: 0.95;
+      line-height: 1.6;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.14);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(8px);
+    }
+
+    .card h2 {
+      margin-bottom: 14px;
+      font-size: 1.5rem;
+      color: #ffe082;
+    }
+
+    .card p {
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    #visitor-list {
+      list-style: none;
+      margin-top: 10px;
+    }
+
+    #visitor-list li {
+      background: rgba(255, 255, 255, 0.16);
+      margin-bottom: 10px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border-left: 5px solid #ffd54f;
+      color: #ffffff;
+    }
+
+    .download-btn {
+      display: inline-block;
+      margin-top: 10px;
+      text-decoration: none;
+      background: linear-gradient(90deg, #ff9800, #ff5722);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-weight: bold;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    }
+
+    .status {
+      margin-top: 12px;
+      font-size: 0.95rem;
+      color: #e0f7fa;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 0.95rem;
+      opacity: 0.9;
+    }
+
+    @media (max-width: 600px) {
+      .hero h1 {
+        font-size: 2.2rem;
+      }
+
+      .hero p {
+        font-size: 1rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <h1>Visitor List</h1>
-    <ul id="visitor-list"></ul>
+  <div class="container">
+    <section class="hero">
+      <h1>Visitor List Dashboard</h1>
+      <p>
+        Welcome to Gouse's Cloud Development project. This page is connected to a
+        Neon PostgreSQL database using a Netlify serverless function.
+      </p>
+    </section>
 
-    <a href="downloads/get-visitors.js" download>Download get-visitors.js</a>
+    <section class="cards">
+      <div class="card">
+        <h2>About This Project</h2>
+        <p>
+          This assignment demonstrates how a frontend webpage can communicate with
+          a serverless backend function and fetch live visitor data from a Neon database.
+        </p>
+        <p>
+          The setup uses Netlify Functions, PostgreSQL on Neon, and a deployed frontend.
+        </p>
+      </div>
 
-    <script>
-        fetch('/.netlify/functions/get-visitors')
-            .then(res => res.json())
-            .then(data => {
-                const list = document.getElementById('visitor-list');
-                data.forEach(v => {
-                    const li = document.createElement('li');
-                    li.textContent = v.name + " — " + v.visited_at;
-                    list.appendChild(li);
-                });
-            })
-            .catch(err => console.error(err));
-    </script>
+      <div class="card">
+        <h2>Visitors</h2>
+        <ul id="visitor-list">
+          <li>Loading visitor data...</li>
+        </ul>
+        <p class="status" id="status-message"></p>
+      </div>
+
+      <div class="card">
+        <h2>Download Assignment File</h2>
+        <p>
+          Click below to download the <code>get-visitors.js</code> file for submission.
+        </p>
+        <a class="download-btn" href="downloads/get-visitors.js" download>
+          Download get-visitors.js
+        </a>
+      </div>
+    </section>
+
+    <footer>
+      <p>Built by Gouse | Cloud Development Assignment</p>
+    </footer>
+  </div>
+
+  <script>
+    fetch('/.netlify/functions/get-visitors')
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch visitors');
+        }
+        return response.json();
+      })
+      .then(visitors => {
+        const list = document.getElementById('visitor-list');
+        const statusMessage = document.getElementById('status-message');
+        list.innerHTML = '';
+
+        if (!Array.isArray(visitors) || visitors.length === 0) {
+          list.innerHTML = '<li>No visitors found.</li>';
+          statusMessage.textContent = 'Database connected, but no records were found.';
+          return;
+        }
+
+        visitors.forEach(visitor => {
+          const li = document.createElement('li');
+          const dateText = visitor.visited_at
+            ? new Date(visitor.visited_at).toLocaleString()
+            : 'No date available';
+
+          li.textContent = `${visitor.name} — ${dateText}`;
+          list.appendChild(li);
+        });
+
+        statusMessage.textContent = 'Visitor data loaded successfully from Neon database.';
+      })
+      .catch(error => {
+        document.getElementById('visitor-list').innerHTML =
+          '<li>Could not load visitor data.</li>';
+        document.getElementById('status-message').textContent = error.message;
+        console.error(error);
+      });
+  </script>
 </body>
 </html>
